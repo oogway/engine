@@ -19,20 +19,13 @@
 package com.torodb.backend.postgresql;
 
 import com.torodb.backend.AbstractMetaDataWriteInterface;
+import com.torodb.backend.BackendLoggerFactory;
 import com.torodb.backend.SqlBuilder;
 import com.torodb.backend.SqlHelper;
 import com.torodb.backend.converters.TableRefConverter;
-import com.torodb.backend.tables.KvTable;
-import com.torodb.backend.tables.MetaCollectionTable;
-import com.torodb.backend.tables.MetaDatabaseTable;
-import com.torodb.backend.tables.MetaDocPartIndexColumnTable;
-import com.torodb.backend.tables.MetaDocPartIndexTable;
-import com.torodb.backend.tables.MetaDocPartTable;
-import com.torodb.backend.tables.MetaFieldTable;
-import com.torodb.backend.tables.MetaIndexFieldTable;
-import com.torodb.backend.tables.MetaIndexTable;
-import com.torodb.backend.tables.MetaScalarTable;
+import com.torodb.backend.tables.*;
 import com.torodb.core.TableRef;
+import org.apache.logging.log4j.Logger;
 import org.jooq.Condition;
 import org.jooq.TableField;
 
@@ -41,6 +34,8 @@ import javax.inject.Singleton;
 
 @Singleton
 public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInterface {
+
+  private static final Logger LOGGER = BackendLoggerFactory.get(PostgreSqlMetaDataWriteInterface.class);
 
   @Inject
   public PostgreSqlMetaDataWriteInterface(PostgreSqlMetaDataReadInterface metaDataReadInterface,
@@ -56,6 +51,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaDatabaseTable.TableFields.IDENTIFIER).append(" varchar  NOT NULL UNIQUE ")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaDatabaseTableStatement: " + statement);
     return statement;
   }
 
@@ -70,6 +66,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaCollectionTable.TableFields.NAME).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaCollectionTableStatement: " + statement);
     return statement;
   }
 
@@ -89,6 +86,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaDocPartTable.TableFields.IDENTIFIER).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaDocPartTableStatement: " + statement);
     return statement;
   }
 
@@ -113,6 +111,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaFieldTable.TableFields.IDENTIFIER).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaFieldTableStatement: " + statement);
     return statement;
   }
 
@@ -135,6 +134,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaScalarTable.TableFields.IDENTIFIER).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaScalarTableStatement: " + statement);
     return statement;
   }
 
@@ -151,6 +151,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaIndexTable.TableFields.NAME).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaIndexTableStatement: " + statement);
     return statement;
   }
 
@@ -176,6 +177,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaIndexFieldTable.TableFields.NAME).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaIndexFieldTableStatement: " + statement);
     return statement;
   }
 
@@ -192,6 +194,7 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaDocPartIndexTable.TableFields.IDENTIFIER).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaDocPartIndexTableStatement: " + statement);
     return statement;
   }
 
@@ -202,16 +205,16 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .append(" (")
         .quote(MetaDocPartIndexColumnTable.TableFields.DATABASE).append("   varchar     NOT NULL ,")
         .quote(MetaDocPartIndexColumnTable.TableFields.INDEX_IDENTIFIER).append(
-        " varchar     NOT NULL ,")
+            " varchar     NOT NULL ,")
         .quote(MetaDocPartIndexColumnTable.TableFields.POSITION).append(" varchar     NOT NULL ,")
         .quote(MetaDocPartIndexColumnTable.TableFields.COLLECTION).append(" varchar     NOT NULL ,")
         .quote(MetaDocPartIndexColumnTable.TableFields.TABLE_REF).append("  varchar[]   NOT NULL ,")
         .quote(MetaDocPartIndexColumnTable.TableFields.IDENTIFIER).append(
-        "       varchar     NOT NULL ,")
+            "       varchar     NOT NULL ,")
         .quote(MetaDocPartIndexColumnTable.TableFields.ORDERING).append(
-        "       varchar     NOT NULL ,")
+            "       varchar     NOT NULL ,")
         .append("    PRIMARY KEY (").quote(MetaDocPartIndexColumnTable.TableFields.DATABASE).append(
-        ",")
+            ",")
         .quote(MetaDocPartIndexColumnTable.TableFields.INDEX_IDENTIFIER).append(",")
         .quote(MetaDocPartIndexColumnTable.TableFields.POSITION).append("),")
         .append("    UNIQUE (").quote(MetaDocPartIndexColumnTable.TableFields.DATABASE).append(",")
@@ -219,13 +222,14 @@ public class PostgreSqlMetaDataWriteInterface extends AbstractMetaDataWriteInter
         .quote(MetaDocPartIndexColumnTable.TableFields.IDENTIFIER).append(")")
         .append(")")
         .toString();
+    LOGGER.info("getCreateMetaDocPartIndexColumnTableStatement: " + statement);
     return statement;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   protected Condition getTableRefEqCondition(@SuppressWarnings("rawtypes") TableField field,
-      TableRef tableRef) {
+                                             TableRef tableRef) {
     return field.eq(TableRefConverter.toStringArray(tableRef));
   }
 
