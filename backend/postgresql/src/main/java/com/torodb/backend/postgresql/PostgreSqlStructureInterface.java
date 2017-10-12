@@ -19,11 +19,8 @@
 package com.torodb.backend.postgresql;
 
 import com.google.common.base.Preconditions;
-import com.torodb.backend.AbstractStructureInterface;
+import com.torodb.backend.*;
 import com.torodb.backend.ErrorHandler.Context;
-import com.torodb.backend.InternalField;
-import com.torodb.backend.SqlBuilder;
-import com.torodb.backend.SqlHelper;
 import com.torodb.backend.converters.jooq.DataTypeForKv;
 import com.torodb.backend.meta.TorodbSchema;
 import com.torodb.core.backend.IdentifierConstraints;
@@ -31,27 +28,30 @@ import com.torodb.core.transaction.metainf.FieldType;
 import com.torodb.core.transaction.metainf.MetaCollection;
 import com.torodb.core.transaction.metainf.MetaDatabase;
 import com.torodb.core.transaction.metainf.MetaDocPart;
+import org.apache.logging.log4j.Logger;
 import org.jooq.DSLContext;
 import org.jooq.lambda.tuple.Tuple3;
 
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.CREATED_AT;
 
 @Singleton
 public class PostgreSqlStructureInterface extends AbstractStructureInterface {
 
   private SqlHelper sqlHelper;
+  private static final Logger LOGGER = BackendLoggerFactory.get(PostgreSqlStructureInterface.class);
 
   @Inject
   public PostgreSqlStructureInterface(PostgreSqlDbBackend dbBackend,
-      PostgreSqlMetaDataReadInterface metaDataReadInterface,
-      SqlHelper sqlHelper, IdentifierConstraints identifierConstraints) {
+                                      PostgreSqlMetaDataReadInterface metaDataReadInterface,
+                                      SqlHelper sqlHelper, IdentifierConstraints identifierConstraints) {
     super(dbBackend, metaDataReadInterface, sqlHelper, identifierConstraints);
 
     this.sqlHelper = sqlHelper;
@@ -81,21 +81,21 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
 
   @Override
   protected String getRenameTableStatement(String fromSchemaName, String fromTableName,
-      String toTableName) {
+                                           String toTableName) {
     return "ALTER TABLE \"" + fromSchemaName + "\".\"" + fromTableName + "\" RENAME TO \""
         + toTableName + "\"";
   }
 
   @Override
-  protected String getRenameIndexStatement(String fromSchemaName, String fromTableName, 
-      String fromIndexName, String toIndexName) {
+  protected String getRenameIndexStatement(String fromSchemaName, String fromTableName,
+                                           String fromIndexName, String toIndexName) {
     return "ALTER INDEX \"" + fromSchemaName + "\".\"" + fromIndexName + "\" RENAME TO \""
         + toIndexName + "\"";
   }
 
   @Override
   protected String getSetTableSchemaStatement(String fromSchemaName, String fromTableName,
-      String toSchemaName) {
+                                              String toSchemaName) {
     return "ALTER TABLE \"" + fromSchemaName + "\".\"" + fromTableName + "\" SET SCHEMA \""
         + toSchemaName + "\"";
   }
@@ -107,7 +107,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
 
   @Override
   protected String getCreateIndexStatement(String indexName, String schemaName, String tableName,
-      List<Tuple3<String, Boolean, FieldType>> columnList, boolean unique) {
+                                           List<Tuple3<String, Boolean, FieldType>> columnList, boolean unique) {
     StringBuilder sb = new StringBuilder()
         .append(unique ? "CREATE UNIQUE INDEX " : "CREATE INDEX ")
         .append("\"").append(indexName).append("\"")
@@ -120,7 +120,11 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
       sb.append("\"").append(columnEntry.v1()).append("\" ")
           .append(columnEntry.v2() ? "ASC," : "DESC,");
     }
+    if (!"_torodb".equals(schemaName)) {
+      sb.append("\"").append(CREATED_AT).append("\" ASC,");
+    }
     sb.setCharAt(sb.length() - 1, ')');
+    LOGGER.info("getCreateIndexStatement : " + sb.toString());
     String statement = sb.toString();
     return statement;
   }
@@ -133,6 +137,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
         .append("\".\"")
         .append(indexName)
         .append("\" CASCADE");
+    LOGGER.info("getDropIndexStatement : " + sb.toString());
     String statement = sb.toString();
     return statement;
   }
@@ -144,7 +149,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
 
   @Override
   protected String getCreateDocPartTableStatement(String schemaName, String tableName,
-      Collection<InternalField<?>> fields) {
+                                                  Collection<InternalField<?>> fields) {
     SqlBuilder sb = new SqlBuilder("CREATE TABLE ");
     sb.table(schemaName, tableName)
         .append(" (");
@@ -157,30 +162,39 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
         }
         sb.append(',');
       }
+
+      if (!"_torodb".equals(schemaName)) {
+        sb.quote(CREATED_AT).append(' ').append("timestamptz default now() ");
+      }
       sb.setLastChar(')');
     } else {
       sb.append(')');
     }
+    LOGGER.info("getCreateDocPartTableStatement : " + sb.toString());
     return sb.toString();
   }
 
   @Override
   protected String getAddDocPartTablePrimaryKeyStatement(String schemaName, String tableName,
-      Collection<InternalField<?>> primaryKeyFields) {
+                                                         Collection<InternalField<?>> primaryKeyFields) {
     SqlBuilder sb = new SqlBuilder("ALTER TABLE ");
     sb.table(schemaName, tableName)
         .append(" ADD PRIMARY KEY (");
     for (InternalField<?> field : primaryKeyFields) {
       sb.quote(field.getName()).append(',');
     }
+    if (!"_torodb".equals(schemaName)) {
+      sb.quote(CREATED_AT).append(',');
+    }
     sb.setLastChar(')');
+    LOGGER.info("getAddDocPartTablePrimaryKeyStatement : " + sb.toString());
     return sb.toString();
   }
 
   @Override
   protected String getAddDocPartTableForeignKeyStatement(String schemaName, String tableName,
-      Collection<InternalField<?>> referenceFields, String foreignTableName,
-      Collection<InternalField<?>> foreignFields) {
+                                                         Collection<InternalField<?>> referenceFields, String foreignTableName,
+                                                         Collection<InternalField<?>> foreignFields) {
     Preconditions.checkArgument(referenceFields.size() == foreignFields.size());
 
     SqlBuilder sb = new SqlBuilder("ALTER TABLE ");
@@ -197,12 +211,13 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
       sb.quote(field.getName()).append(',');
     }
     sb.setLastChar(')');
+    LOGGER.info("getAddDocPartTableForeignKeyStatement : " + sb.toString());
     return sb.toString();
   }
 
   @Override
   protected String getCreateDocPartTableIndexStatement(String schemaName,
-      String tableName, Collection<InternalField<?>> indexFields) {
+                                                       String tableName, Collection<InternalField<?>> indexFields) {
     Preconditions.checkArgument(!indexFields.isEmpty());
     SqlBuilder sb = new SqlBuilder("CREATE INDEX ON ")
         .table(schemaName, tableName)
@@ -210,20 +225,25 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
     for (InternalField<?> field : indexFields) {
       sb.quote(field.getName()).append(',');
     }
+    if (!"_torodb".equals(schemaName)) {
+      sb.quote(CREATED_AT).append(',');
+    }
     sb.setLastChar(')');
+    LOGGER.info("getCreateDocPartTableIndexStatement : " + sb.toString());
     return sb.toString();
   }
 
   @Override
   protected String getAddColumnToDocPartTableStatement(String schemaName, String tableName,
-      String columnName,
-      DataTypeForKv<?> dataType) {
+                                                       String columnName,
+                                                       DataTypeForKv<?> dataType) {
     SqlBuilder sb = new SqlBuilder("ALTER TABLE ")
         .table(schemaName, tableName)
         .append(" ADD COLUMN ")
         .quote(columnName)
         .append(" ")
         .append(dataType.getCastTypeName());
+    LOGGER.info("getAddColumnToDocPartTableStatement : " + sb.toString());
     return sb.toString();
   }
 
@@ -237,7 +257,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
   }
 
   private Function<DSLContext, String> createAnalyzeConsumer(MetaDatabase db, MetaCollection col,
-      MetaDocPart docPart) {
+                                                             MetaDocPart docPart) {
     return dsl -> {
       SqlBuilder sb = new SqlBuilder("ANALYZE ")
           .table(db.getIdentifier(), docPart.getIdentifier());

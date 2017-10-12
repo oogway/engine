@@ -42,6 +42,7 @@ import com.torodb.core.transaction.metainf.MetaIdentifiedDocPartIndex;
 import com.torodb.core.transaction.metainf.MetaIndex;
 import com.torodb.core.transaction.metainf.MetaIndexField;
 import com.torodb.core.transaction.metainf.MetaScalar;
+import org.apache.logging.log4j.Logger;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -55,6 +56,7 @@ import javax.inject.Singleton;
 @Singleton
 public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInterface {
 
+  private static final Logger LOGGER = BackendLoggerFactory.get(AbstractMetaDataWriteInterface.class);
   private final MetaDatabaseTable<?> metaDatabaseTable;
   private final MetaCollectionTable<?> metaCollectionTable;
   private final MetaDocPartTable<?, ?> metaDocPartTable;
@@ -88,6 +90,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaDatabaseTable.getName();
     String statement = getCreateMetaDatabaseTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaDatabaseTable " + statement);
   }
 
   protected abstract String getCreateMetaDatabaseTableStatement(String schemaName,
@@ -99,6 +102,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaCollectionTable.getName();
     String statement = getCreateMetaCollectionTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaCollectionTable " + statement);
   }
 
   protected abstract String getCreateMetaCollectionTableStatement(String schemaName,
@@ -110,6 +114,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaDocPartTable.getName();
     String statement = getCreateMetaDocPartTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaDocPartTable " + statement);
   }
 
   protected abstract String getCreateMetaDocPartTableStatement(String schemaName, String tableName);
@@ -120,6 +125,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaFieldTable.getName();
     String statement = getCreateMetaFieldTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaFieldTable " + statement);
   }
 
   protected abstract String getCreateMetaFieldTableStatement(String schemaName, String tableName);
@@ -130,6 +136,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaScalarTable.getName();
     String statement = getCreateMetaScalarTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaScalarTable " + statement);
   }
 
   protected abstract String getCreateMetaScalarTableStatement(String schemaName, String tableName);
@@ -140,6 +147,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaIndexTable.getName();
     String statement = getCreateMetaIndexTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaIndexTable " + statement);
   }
 
   protected abstract String getCreateMetaIndexTableStatement(String schemaName, String tableName);
@@ -150,6 +158,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaIndexFieldTable.getName();
     String statement = getCreateMetaIndexFieldTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaIndexFieldTable " + statement);
   }
 
   protected abstract String getCreateMetaIndexFieldTableStatement(String schemaName,
@@ -161,6 +170,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaDocPartIndexTable.getName();
     String statement = getCreateMetaDocPartIndexTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaDocPartIndexTable " + statement);
   }
 
   protected abstract String getCreateMetaDocPartIndexTableStatement(String schemaName,
@@ -172,6 +182,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = metaDocPartIndexColumnTable.getName();
     String statement = getCreateMetaDocPartIndexColumnTableStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createMetaFieldIndexTable " + statement);
   }
 
   protected abstract String getCreateMetaDocPartIndexColumnTableStatement(String schemaName,
@@ -183,6 +194,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String tableName = kvTable.getName();
     String statement = getCreateMetainfStatement(schemaName, tableName);
     sqlHelper.executeStatement(dsl, statement, Context.CREATE_TABLE);
+    LOGGER.info("createKvTable " + statement);
   }
 
   protected abstract String getCreateMetainfStatement(String schemaName, String tableName);
@@ -191,6 +203,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
   public void addMetaDatabase(DSLContext dsl, MetaDatabase database) {
     String statement = getAddMetaDatabaseStatement(database.getName(), database.getIdentifier());
     sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    LOGGER.info("addMetaDatabase " + statement);
   }
 
   @Override
@@ -198,6 +211,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaCollectionStatement(database.getName(), collection.getName(),
         collection.getIdentifier());
     sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    LOGGER.info("addMetaCollection " + statement);
   }
 
   @Override
@@ -207,6 +221,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .getTableRef(),
         docPart.getIdentifier());
     sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    LOGGER.info("addMetaDocPart " + statement);
   }
 
   @Override
@@ -217,6 +232,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         field.getName(), field.getIdentifier(),
         field.getType());
     sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    LOGGER.info("addMetaField " + statement);
   }
 
   @Override
@@ -226,6 +242,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .getTableRef(),
         scalar.getIdentifier(), scalar.getType());
     sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    LOGGER.info("addMetaScalar " + statement);
   }
 
   @Override
@@ -234,7 +251,8 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaIndexStatement(database.getName(), collection.getName(), index
         .getName(),
         index.isUnique());
-    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
+    LOGGER.info("addMetaIndex " + statement);
   }
 
   @Override
@@ -243,7 +261,8 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaIndexFieldStatement(database.getName(), collection.getName(), index
         .getName(),
         field.getPosition(), field.getTableRef(), field.getFieldName(), field.getOrdering());
-    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
+    LOGGER.info("addMetaIndexField " + statement);
   }
 
   @Override
@@ -252,7 +271,8 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaDocPartIndexStatement(database.getName(), index.getIdentifier(),
         collection.getName(),
         docPart.getTableRef(), index.isUnique());
-    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
+    LOGGER.info("addMetaDocPartIndex " + statement);
   }
 
   @Override
@@ -263,12 +283,14 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .getIdentifier(), column.getPosition(),
         collection.getName(), docPart.getTableRef(), column.getIdentifier(), column.getOrdering());
     sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    LOGGER.info("addMetaDocPartIndexColumn " + statement);
   }
 
   protected String getAddMetaDatabaseStatement(String databaseName, String databaseIdentifier) {
     String statement = sqlHelper.dsl().insertInto(metaDatabaseTable)
         .set(metaDatabaseTable.newRecord().values(databaseName, databaseIdentifier)).getSQL(
         ParamType.INLINED);
+    LOGGER.info("getAddMetaDatabaseStatement : deleteMetaDatabase " + statement);
     return statement;
   }
 
@@ -277,6 +299,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().insertInto(metaCollectionTable)
         .set(metaCollectionTable.newRecord()
             .values(databaseName, collectionName, collectionIdentifier)).getSQL(ParamType.INLINED);
+    LOGGER.info("getAddMetaCollectionStatement : deleteMetaCollection " + statement);
     return statement;
   }
 
@@ -287,6 +310,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .set(metaDocPartTable.newRecord()
             .values(databaseName, collectionName, tableRef, docPartIdentifier)).getSQL(
         ParamType.INLINED);
+    LOGGER.info("getAddMetaDocPartStatement : deleteMetaIndex " + statement);
     return statement;
   }
 
@@ -297,6 +321,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .set(metaFieldTable.newRecord()
             .values(databaseName, collectionName, tableRef, fieldName, type, fieldIdentifier))
         .getSQL(ParamType.INLINED);
+    LOGGER.info("getAddMetaFieldStatement : deleteMetaDocPartIndex " + statement);
     return statement;
   }
 
@@ -307,6 +332,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .set(metaScalarTable.newRecord()
             .values(databaseName, collectionName, tableRef, type, fieldIdentifier)).getSQL(
         ParamType.INLINED);
+    LOGGER.info("getAddMetaScalarStatement : consumeRids " + statement);
     return statement;
   }
 
@@ -315,6 +341,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().insertInto(metaIndexTable)
         .set(metaIndexTable.newRecord()
             .values(databaseName, collectionName, indexName, unique)).getSQL(ParamType.INLINED);
+    LOGGER.info("getAddMetaIndexStatement : writeMetaInfo " + statement);
     return statement;
   }
 
@@ -332,6 +359,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
                 fieldName,
                 ordering))
         .getSQL(ParamType.INLINED);
+    LOGGER.info("getAddMetaIndexFieldStatement :  " + statement);
     return statement;
   }
 
@@ -342,6 +370,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .set(metaDocPartIndexTable.newRecord()
             .values(databaseName, indexName, collectionName, tableRef, unique)).getSQL(
         ParamType.INLINED);
+    LOGGER.info("getAddMetaDocPartIndexStatement :  " + statement);
     return statement;
   }
 
@@ -352,6 +381,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .set(metaDocPartIndexColumnTable.newRecord()
             .values(databaseName, indexName, position, collectionName, tableRef, columnName,
                 ordering)).getSQL(ParamType.INLINED);
+    LOGGER.info("getAddMetaDocPartIndexColumnStatement :  " + statement);
     return statement;
   }
 
@@ -359,6 +389,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
   public void deleteMetaDatabase(DSLContext dsl, MetaDatabase database) {
     String statement = getDeleteMetaDatabaseStatement(database.getName());
     sqlHelper.executeUpdate(dsl, statement, Context.META_DELETE);
+    LOGGER.info("deleteMetaDatabase :  " + statement);
   }
 
   @Override
@@ -384,6 +415,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
 
     statement = getDeleteMetaCollectionStatement(database.getName(), collection.getName());
     sqlHelper.executeUpdate(dsl, statement, Context.META_DELETE);
+    LOGGER.info("deleteMetaCollection :  " + statement);
   }
 
   @Override
@@ -395,6 +427,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     statement = getDeleteMetaIndexStatement(database.getName(), collection.getName(), index
         .getName());
     sqlHelper.executeUpdate(dsl, statement, Context.META_DELETE);
+    LOGGER.info("deleteMetaIndex :  " + statement);
   }
 
   @Override
@@ -406,11 +439,13 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     statement = getDeleteMetaDocPartIndexStatement(database.getName(), collection.getName(), index
         .getIdentifier());
     sqlHelper.executeUpdate(dsl, statement, Context.META_DELETE);
+    LOGGER.info("deleteMetaDocPartIndex :  " + statement);
   }
 
   protected String getDeleteMetaDatabaseStatement(String databaseName) {
     String statement = sqlHelper.dsl().deleteFrom(metaDatabaseTable)
         .where(metaDatabaseTable.NAME.eq(databaseName)).getSQL(ParamType.INLINED);
+    LOGGER.info("getDeleteMetaDatabaseStatement :  " + statement);
     return statement;
   }
 
@@ -418,6 +453,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().deleteFrom(metaCollectionTable)
         .where(metaCollectionTable.DATABASE.eq(databaseName)
             .and(metaCollectionTable.NAME.eq(collectionName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getDeleteMetaCollectionStatement :  " + statement);
     return statement;
   }
 
@@ -426,6 +462,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().deleteFrom(metaDocPartTable)
         .where(metaDocPartTable.DATABASE.eq(databaseName)
             .and(metaDocPartTable.COLLECTION.eq(collectionName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaDocPartStatement :  " + statement);
     return statement;
   }
 
@@ -433,6 +470,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().deleteFrom(metaFieldTable)
         .where(metaFieldTable.DATABASE.eq(databaseName)
             .and(metaFieldTable.COLLECTION.eq(collectionName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaFieldStatement :  " + statement);
     return statement;
   }
 
@@ -440,6 +478,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().deleteFrom(metaScalarTable)
         .where(metaScalarTable.DATABASE.eq(databaseName)
             .and(metaScalarTable.COLLECTION.eq(collectionName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaScalarStatement :  " + statement);
     return statement;
   }
 
@@ -447,6 +486,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().deleteFrom(metaIndexTable)
         .where(metaIndexTable.DATABASE.eq(databaseName)
             .and(metaIndexTable.COLLECTION.eq(collectionName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaIndexStatement :  " + statement);
     return statement;
   }
 
@@ -455,6 +495,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().deleteFrom(metaIndexFieldTable)
         .where(metaIndexFieldTable.DATABASE.eq(databaseName)
             .and(metaIndexFieldTable.COLLECTION.eq(collectionName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaIndexFieldStatement :  " + statement);
     return statement;
   }
 
@@ -464,6 +505,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .where(metaIndexFieldTable.DATABASE.eq(databaseName)
             .and(metaIndexFieldTable.COLLECTION.eq(collectionName))
             .and(metaIndexFieldTable.INDEX.eq(indexName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaIndexFieldStatement :  " + statement);
     return statement;
   }
 
@@ -471,6 +513,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
       String collectionName) {
     String statement = sqlHelper.dsl().deleteFrom(metaDocPartIndexTable)
         .where(metaDocPartIndexTable.DATABASE.eq(databaseName)).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaDocPartIndexStatement :  " + statement);
     return statement;
   }
 
@@ -478,6 +521,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
       String collectionName) {
     String statement = sqlHelper.dsl().deleteFrom(metaDocPartIndexColumnTable)
         .where(metaDocPartIndexColumnTable.DATABASE.eq(databaseName)).getSQL(ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaDocPartIndexColumnStatement :  " + statement);
     return statement;
   }
 
@@ -487,6 +531,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .where(metaDocPartIndexColumnTable.DATABASE.eq(databaseName)
             .and(metaDocPartIndexColumnTable.INDEX_IDENTIFIER.eq(indexIdentifier))).getSQL(
         ParamType.INLINED);
+    LOGGER.info("getCascadeDeleteMetaDocPartIndexColumnStatement :  " + statement);
     return statement;
   }
 
@@ -496,6 +541,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
         .where(metaIndexTable.DATABASE.eq(databaseName)
             .and(metaIndexTable.COLLECTION.eq(collectionName))
             .and(metaIndexTable.NAME.eq(indexName))).getSQL(ParamType.INLINED);
+    LOGGER.info("getDeleteMetaIndexStatement :  " + statement);
     return statement;
   }
 
@@ -504,6 +550,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = sqlHelper.dsl().deleteFrom(metaDocPartIndexTable)
         .where(metaDocPartIndexTable.DATABASE.eq(databaseName)
             .and(metaDocPartIndexTable.IDENTIFIER.eq(indexIdentifier))).getSQL(ParamType.INLINED);
+    LOGGER.info("getDeleteMetaDocPartIndexStatement :  " + statement);
     return statement;
   }
 

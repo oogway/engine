@@ -94,6 +94,7 @@ public class PostgreSqlWriteInterface extends AbstractWriteInterface {
     }
     sb.setCharAt(sb.length() - 1, ')');
     String statement = sb.toString();
+    LOGGER.info("getDeleteDocPartsStatement: " + statement);
     return statement;
   }
 
@@ -223,6 +224,7 @@ public class PostgreSqlWriteInterface extends AbstractWriteInterface {
     copyStatementBuilder.setCharAt(copyStatementBuilder.length() - 1, ')');
     copyStatementBuilder.append(" FROM STDIN");
     final String copyStatement = copyStatementBuilder.toString();
+    LOGGER.info("getCopyInsertDocPartDataStatement: " + copyStatement);
     return copyStatement;
   }
 
@@ -336,6 +338,7 @@ public class PostgreSqlWriteInterface extends AbstractWriteInterface {
     insertStatementBuilder.append(insertStatementValuesBuilder);
 
     String statement = insertStatementBuilder.toString();
+     LOGGER.info("getInsertDocPartDataStatement: " + statement);
     return statement;
   }
 }

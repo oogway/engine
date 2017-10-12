@@ -111,9 +111,12 @@ public abstract class AbstractWriteInterface implements WriteInterface {
       MetaDocPart metaDocPart = iterator.next();
       String statement = getDeleteDocPartsStatement(schemaName, metaDocPart.getIdentifier(), dids);
 
-      sqlHelper.executeUpdate(c, statement, Context.DELETE);
 
-      LOGGER.trace("Executed {}", statement);
+      if ("_torodb".equals(schemaName)){
+        sqlHelper.executeUpdate(c, statement, Context.DELETE);
+      }
+
+      LOGGER.info("Executed {}", statement);
     }
   }
 
@@ -186,8 +189,8 @@ public abstract class AbstractWriteInterface implements WriteInterface {
           }
           preparedStatement.addBatch();
 
+          LOGGER.info("Added to insert {}", preparedStatement.toString());
           if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Added to insert {}", preparedStatement.toString());
           }
 
           if (docCounter % maxBatchSize == 0 || !docPartRowIterator.hasNext()) {

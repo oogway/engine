@@ -52,6 +52,8 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.CREATED_AT;
+
 @Singleton
 public abstract class AbstractStructureInterface implements StructureInterface {
 
@@ -167,8 +169,9 @@ public abstract class AbstractStructureInterface implements StructureInterface {
       String statement = getCreateIndexStatement(indexName, schemaName, tableName, columnList,
           unique);
 
-      sqlHelper.executeUpdateOrThrow(dsl, statement, unique ? Context.ADD_UNIQUE_INDEX :
-          Context.CREATE_INDEX);
+      // TODO: below line needs to be commented
+      /*sqlHelper.executeUpdateOrThrow(dsl, statement, unique ? Context.ADD_UNIQUE_INDEX :
+          Context.CREATE_INDEX);*/
     }
   }
 
@@ -325,7 +328,8 @@ public abstract class AbstractStructureInterface implements StructureInterface {
       String readIndexStatement = getCreateDocPartTableIndexStatement(schemaName, tableName,
           metaDataReadInterface.getReadInternalFields(tableRef));
       result.add((dsl) -> {
-        sqlHelper.executeStatement(dsl, readIndexStatement, Context.CREATE_INDEX);
+        // TODO: below line needs to be commented
+        /*sqlHelper.executeStatement(dsl, readIndexStatement, Context.CREATE_INDEX);*/
         return metaDataReadInterface.getReadInternalFields(tableRef).stream()
             .map(f -> f.getName()).collect(Collectors.joining("_")) + "_idx";
       });
@@ -347,7 +351,8 @@ public abstract class AbstractStructureInterface implements StructureInterface {
               schemaName, tableName,
               metaDataReadInterface.getReferenceInternalFields(tableRef));
           result.add((dsl) -> {
-            sqlHelper.executeStatement(dsl, foreignKeyIndexStatement, Context.CREATE_INDEX);
+            // TODO: below line needs to be commented
+            /*sqlHelper.executeStatement(dsl, foreignKeyIndexStatement, Context.CREATE_INDEX);*/
             return metaDataReadInterface.getReferenceInternalFields(tableRef).stream().map(f -> f
                 .getName()).collect(Collectors.joining("_")) + "_idx";
           });
@@ -381,7 +386,9 @@ public abstract class AbstractStructureInterface implements StructureInterface {
     String statement = getAddColumnToDocPartTableStatement(schemaName, tableName, columnName,
         dataType);
 
-    sqlHelper.executeStatement(dsl, statement, Context.ADD_COLUMN);
+    if (!columnName.equals(CREATED_AT)){
+      sqlHelper.executeStatement(dsl, statement, Context.ADD_COLUMN);
+    }
   }
 
   protected abstract String getAddColumnToDocPartTableStatement(String schemaName, String tableName,

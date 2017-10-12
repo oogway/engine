@@ -19,6 +19,7 @@
 package com.torodb.backend.ddl;
 
 import com.google.common.base.Preconditions;
+import com.torodb.backend.BackendLoggerFactory;
 import com.torodb.backend.ErrorHandler;
 import com.torodb.backend.SqlInterface;
 import com.torodb.core.backend.DdlOperationExecutor;
@@ -34,6 +35,7 @@ import com.torodb.core.transaction.metainf.MetaSnapshot;
 import com.torodb.core.transaction.metainf.MutableMetaCollection;
 import com.torodb.core.transaction.metainf.MutableMetaDatabase;
 import com.torodb.core.transaction.metainf.MutableMetaDocPart;
+import org.apache.logging.log4j.Logger;
 import org.jooq.DSLContext;
 
 import java.sql.Connection;
@@ -45,6 +47,7 @@ import java.util.stream.Stream;
  */
 public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
 
+  private static final Logger LOGGER = BackendLoggerFactory.get(DefaultDdlOperationExecutor.class);
   private boolean closed = false;
   private final SqlInterface sqlInterface;
   private final DSLContext dsl;
@@ -78,6 +81,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void addDatabase(MetaDatabase db) throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("addDatabase called.");
       ddlOps.getWriteStructureDdlOps().addDatabase(dsl, db);
       commit();
     } catch (RollbackException ex) {
@@ -90,6 +94,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void addCollection(MetaDatabase db, MetaCollection newCol) throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("addCollection called.");
       ddlOps.getWriteStructureDdlOps().addCollection(dsl, db, newCol);
       commit();
     } catch (RollbackException ex) {
@@ -103,6 +108,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
       boolean addColumns) throws RollbackException, UserException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("addDocPart called.");
       ddlOps.getWriteStructureDdlOps().addDocPart(dsl, db, col, newDocPart, addColumns);
       commit();
     } catch (RollbackException ex) {
@@ -118,6 +124,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
 
     try {
+      LOGGER.info("addColumns called.");
       ddlOps.getWriteStructureDdlOps().addColumns(dsl, db, col, docPart, scalars, fields);
       commit();
     } catch (RollbackException ex) {
@@ -130,6 +137,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public MetaSnapshot readMetadata() {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("readMetadata  called.");
       return ddlOps.getReadStructureDdlOp().readMetadata(dsl);
     } catch (RollbackException ex) {
       rollback();
@@ -141,6 +149,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void disableDataImportMode(MetaDatabase db) throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("disableDataImportMode called.");
       ddlOps.getDataImportModeDdlOps().disableDataImportMode(dsl, db);
       commit();
     } catch (RollbackException ex) {
@@ -153,6 +162,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void enableDataImportMode(MetaDatabase db) throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("enableDataImportMode called.");
       ddlOps.getDataImportModeDdlOps().enableDataImportMode(db);
       commit();
     } catch (RollbackException ex) {
@@ -165,6 +175,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void dropCollection(MetaDatabase db, MetaCollection coll) throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("dropCollection called.");
       ddlOps.getWriteStructureDdlOps().dropCollection(dsl, db, coll);
       commit();
     } catch (RollbackException ex) {
@@ -177,6 +188,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void dropDatabase(MetaDatabase db) throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("dropDatabase called.");
       ddlOps.getWriteStructureDdlOps().dropDatabase(dsl, db);
       commit();
     } catch (RollbackException ex) {
@@ -190,6 +202,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
       throws UserException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("createIndex called.");
       ddlOps.getCreateIndexDdlOp().createIndex(dsl, db, col, index);
       commit();
     } catch (RollbackException ex) {
@@ -202,6 +215,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void dropIndex(MetaDatabase db, MutableMetaCollection col, MetaIndex index) {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("dropIndex called.");
       ddlOps.getDropIndexDdlOp().dropIndex(dsl, db, col, index);
       commit();
     } catch (RollbackException ex) {
@@ -215,6 +229,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
       MutableMetaDatabase toDb, MutableMetaCollection toColl) throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("renameCollection called.");
       ddlOps.getRenameDdlOp().renameCollection(dsl, fromDb, fromColl, toDb, toColl);
       commit();
     } catch (RollbackException ex) {
@@ -227,6 +242,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void dropAll() throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("dropAll called.");
       sqlInterface.getStructureInterface().dropAll(dsl);
       commit();
     } catch (RollbackException ex) {
@@ -239,6 +255,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void dropUserData() throws RollbackException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("dropUserData called.");
       sqlInterface.getStructureInterface().dropUserData(dsl);
       commit();
     } catch (RollbackException ex) {
@@ -251,6 +268,7 @@ public class DefaultDdlOperationExecutor implements DdlOperationExecutor {
   public void checkOrCreateMetaDataTables() throws InvalidDatabaseException {
     Preconditions.checkState(!isClosed(), "This operation executor is closed");
     try {
+      LOGGER.info("checkOrCreateMetaDataTables called.");
       ddlOps.getWriteStructureDdlOps().checkOrCreateMetaDataTables(dsl);
       commit();
     } catch (RollbackException ex) {

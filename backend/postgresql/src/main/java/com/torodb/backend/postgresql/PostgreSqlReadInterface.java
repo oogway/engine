@@ -19,6 +19,7 @@
 package com.torodb.backend.postgresql;
 
 import com.torodb.backend.AbstractReadInterface;
+import com.torodb.backend.BackendLoggerFactory;
 import com.torodb.backend.InternalField;
 import com.torodb.backend.SqlHelper;
 import com.torodb.backend.tables.MetaDocPartTable.DocPartTableFields;
@@ -26,33 +27,36 @@ import com.torodb.core.TableRef;
 import com.torodb.core.TableRefFactory;
 import com.torodb.core.transaction.metainf.MetaDatabase;
 import com.torodb.core.transaction.metainf.MetaDocPart;
+import org.apache.logging.log4j.Logger;
 import org.jooq.Converter;
 import org.jooq.lambda.tuple.Tuple2;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.CREATED_AT;
 
 @Singleton
 public class PostgreSqlReadInterface extends AbstractReadInterface {
 
+  private static final Logger LOGGER = BackendLoggerFactory.get(PostgreSqlReadInterface.class);
   private final PostgreSqlMetaDataReadInterface metaDataReadInterface;
 
   @Inject
   public PostgreSqlReadInterface(PostgreSqlMetaDataReadInterface metaDataReadInterface,
-      PostgreSqlDataTypeProvider dataTypeProvider,
-      PostgreSqlErrorHandler errorhandler, SqlHelper sqlHelper, TableRefFactory tableRefFactory) {
+                                 PostgreSqlDataTypeProvider dataTypeProvider,
+                                 PostgreSqlErrorHandler errorhandler, SqlHelper sqlHelper, TableRefFactory tableRefFactory) {
     super(metaDataReadInterface, dataTypeProvider, errorhandler, sqlHelper, tableRefFactory);
     this.metaDataReadInterface = metaDataReadInterface;
   }
 
   @Override
   protected String getReadCollectionDidsWithFieldEqualsToStatement(String schemaName,
-      String rootTableName,
-      String columnName) {
+                                                                   String rootTableName,
+                                                                   String columnName) {
     StringBuilder sb = new StringBuilder()
         .append("SELECT \"")
         .append(DocPartTableFields.DID.fieldName)
@@ -70,6 +74,7 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
         .append(DocPartTableFields.DID.fieldName)
         .append('"');
     String statement = sb.toString();
+    LOGGER.info("getReadCollectionDidsWithFieldEqualsToStatement : " + statement);
     return statement;
   }
 
@@ -109,13 +114,14 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
         .append(DocPartTableFields.DID.fieldName)
         .append('"');
     String statement = sb.toString();
+    LOGGER.info("getReadCollectionDidsWithFieldInStatement : " + statement);
     return statement;
   }
 
   @Override
   protected String getReadCollectionDidsAndProjectionWithFieldInStatement(String schemaName,
-      String rootTableName,
-      String columnName, int valuesCount) {
+                                                                          String rootTableName,
+                                                                          String columnName, int valuesCount) {
     StringBuilder sb = new StringBuilder()
         .append("SELECT \"")
         .append(DocPartTableFields.DID.fieldName)
@@ -133,8 +139,10 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
       sb.append("?,");
     }
     sb.setCharAt(sb.length() - 1, ')');
+    sb.append(" ORDER BY " + CREATED_AT + " DESC LIMIT 1");
 
     String statement = sb.toString();
+    LOGGER.info("getReadCollectionDidsAndProjectionWithFieldInStatement : " + statement);
     return statement;
   }
 
@@ -149,6 +157,7 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
         .append(rootTableName)
         .append('"');
     String statement = sb.toString();
+    LOGGER.info("getReadAllCollectionDidsStatement : " + statement);
     return statement;
   }
 
@@ -161,12 +170,13 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
         .append(rootTableName)
         .append('"');
     String statement = sb.toString();
+    LOGGER.info("getReadCountAllStatement : " + statement);
     return statement;
   }
 
   @Override
   protected String getDocPartStatament(MetaDatabase metaDatabase, MetaDocPart metaDocPart,
-      Collection<Integer> dids) {
+                                       Collection<Integer> dids) {
     StringBuilder sb = new StringBuilder()
         .append("SELECT ");
     Collection<InternalField<?>> internalFields = metaDataReadInterface.getInternalFields(
@@ -214,6 +224,7 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
       }
       sb.deleteCharAt(sb.length() - 1);
     }
+    LOGGER.info("getDocPartStatament : " + sb.toString());
     return sb.toString();
   }
 
@@ -230,6 +241,7 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
         .append(metaDocPart.getIdentifier())
         .append("\"");
     String statement = sb.toString();
+    LOGGER.info("getLastRowIdUsedStatement : " + statement);
     return statement;
   }
 }

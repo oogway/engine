@@ -27,40 +27,29 @@ import com.torodb.core.d2r.IdentifierFactory;
 import com.torodb.core.exceptions.InvalidDatabaseException;
 import com.torodb.core.exceptions.user.UserException;
 import com.torodb.core.transaction.RollbackException;
-import com.torodb.core.transaction.metainf.FieldType;
-import com.torodb.core.transaction.metainf.MetaCollection;
-import com.torodb.core.transaction.metainf.MetaDatabase;
-import com.torodb.core.transaction.metainf.MetaDocPart;
-import com.torodb.core.transaction.metainf.MetaDocPartIndexColumn;
-import com.torodb.core.transaction.metainf.MetaField;
-import com.torodb.core.transaction.metainf.MetaIdentifiedDocPartIndex;
-import com.torodb.core.transaction.metainf.MetaIndex;
-import com.torodb.core.transaction.metainf.MetaScalar;
-import com.torodb.core.transaction.metainf.MutableMetaDocPart;
-import com.torodb.core.transaction.metainf.MutableMetaDocPartIndex;
+import com.torodb.core.transaction.metainf.*;
 import org.apache.logging.log4j.Logger;
 import org.jooq.DSLContext;
 import org.jooq.lambda.tuple.Tuple2;
 import org.jooq.lambda.tuple.Tuple3;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Stream;
-
 import javax.inject.Inject;
+import java.util.*;
+import java.util.stream.Stream;
 
 
 
 public class DefaultStructureDdlOps implements WriteStructureDdlOps {
 
   private static final Logger LOGGER = BackendLoggerFactory.get(DefaultStructureDdlOps.class);
+  public static final String CREATED_AT = "created_at__private";
 
   private final SqlInterface sqlInterface;
   private final TableRefFactory tableRefFactory;
   private final IdentifierFactory identifierFactory;
   private final SchemaUpdater schemaUpdater;
 
+  private Map<String, Boolean> map = new HashMap<>();
   @Inject
   public DefaultStructureDdlOps(SqlInterface sqlInterface, TableRefFactory tableRefFactory,
       IdentifierFactory identifierFactory, SchemaUpdater schemaUpdater) {
@@ -88,7 +77,7 @@ public class DefaultStructureDdlOps implements WriteStructureDdlOps {
     }
     sqlInterface.getMetaDataWriteInterface().deleteMetaDatabase(dsl, db);
     sqlInterface.getStructureInterface().dropDatabase(dsl, db);
-    
+
   }
 
   @Override
@@ -107,7 +96,7 @@ public class DefaultStructureDdlOps implements WriteStructureDdlOps {
           db.getIdentifier(), newRootDocPart.getIdentifier(), rootTableRef)
         .forEach(statement -> statement.apply(dsl));
     }
-    
+
   }
 
   @Override
@@ -169,7 +158,15 @@ public class DefaultStructureDdlOps implements WriteStructureDdlOps {
     while (fieldIt.hasNext()) {
       addField(dsl, db, col, docPart, fieldIt.next());
     }
-    
+    // TODO: below line needs to be added to add the created_at field in the "field" table.
+    if (!"torodb".equals(db.getName())) {
+      String key = db.getName() + "-" + docPart.getIdentifier();
+      if (!map.containsKey(key)) {
+        addField(dsl, db, col, docPart, new ImmutableMetaField(CREATED_AT, CREATED_AT, FieldType.INSTANT));
+        map.put(key, true);
+        LOGGER.info("map is : " + map.keySet());
+      }
+    }
   }
 
   @Override
@@ -177,7 +174,7 @@ public class DefaultStructureDdlOps implements WriteStructureDdlOps {
     schemaUpdater.checkOrCreate(dsl);
   }
 
-  private void addField(DSLContext dsl, MetaDatabase db, MetaCollection col, 
+  private void addField(DSLContext dsl, MetaDatabase db, MetaCollection col,
       MutableMetaDocPart docPart, MetaField newField) throws UserException {
     sqlInterface.getMetaDataWriteInterface().addMetaField(dsl, db, col, docPart,
         newField);
