@@ -64,12 +64,12 @@ class MemoryWriteTransaction extends MemoryTransaction implements WriteDocTransa
   public long deleteByAttRef(String dbName, String colName, AttributeReference attRef,
       KvValue<?> value) {
     return trans.delete(dbName, colName, streamByAttRef(dbName, colName, attRef, value).map(
-        ToroDocument::getId));
+        ToroDocument::getId), false);
   }
 
   @Override
-  public void delete(String dbName, String colName, Cursor<Integer> cursor) {
-    trans.delete(dbName, colName, cursor.getRemaining().stream());
+  public void delete(String dbName, String colName, Cursor<Integer> cursor, boolean softDeleted) {
+    trans.delete(dbName, colName, cursor.getRemaining().stream(), softDeleted);
   }
 
   @Override

@@ -43,6 +43,7 @@ public class DefaultStructureDdlOps implements WriteStructureDdlOps {
 
   private static final Logger LOGGER = BackendLoggerFactory.get(DefaultStructureDdlOps.class);
   public static final String CREATED_AT = "created_at__private";
+  public static final String DELETED_AT = "deleted_at__private";
 
   private final SqlInterface sqlInterface;
   private final TableRefFactory tableRefFactory;
@@ -157,15 +158,6 @@ public class DefaultStructureDdlOps implements WriteStructureDdlOps {
     Iterator<? extends MetaField> fieldIt = fields.iterator();
     while (fieldIt.hasNext()) {
       addField(dsl, db, col, docPart, fieldIt.next());
-    }
-    // TODO: below line needs to be added to add the created_at field in the "field" table.
-    if (!"torodb".equals(db.getName())) {
-      String key = db.getName() + "-" + docPart.getIdentifier();
-      if (!map.containsKey(key)) {
-        addField(dsl, db, col, docPart, new ImmutableMetaField(CREATED_AT, CREATED_AT, FieldType.INSTANT));
-        map.put(key, true);
-        LOGGER.info("map is : " + map.keySet());
-      }
     }
   }
 

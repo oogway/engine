@@ -41,6 +41,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.torodb.backend.ddl.DefaultStructureDdlOps.CREATED_AT;
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.DELETED_AT;
 
 @Singleton
 public class PostgreSqlStructureInterface extends AbstractStructureInterface {
@@ -164,7 +165,8 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
       }
 
       if (!"_torodb".equals(schemaName)) {
-        sb.quote(CREATED_AT).append(' ').append("timestamptz default now() ");
+        sb.quote(CREATED_AT).append(' ').append("timestamptz default now(), ");
+        sb.quote(DELETED_AT).append(' ').append("timestamptz ");
       }
       sb.setLastChar(')');
     } else {

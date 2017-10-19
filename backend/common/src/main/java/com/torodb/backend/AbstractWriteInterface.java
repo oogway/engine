@@ -70,7 +70,7 @@ public abstract class AbstractWriteInterface implements WriteInterface {
   @Override
   public long deleteCollectionDocParts(@Nonnull DSLContext dsl,
       @Nonnull String schemaName, @Nonnull MetaCollection metaCollection,
-      @Nonnull Cursor<Integer> didCursor
+      @Nonnull Cursor<Integer> didCursor, boolean softDeleted
   ) {
     Connection c = dsl.configuration().connectionProvider().acquire();
     try {
@@ -79,7 +79,7 @@ public abstract class AbstractWriteInterface implements WriteInterface {
 
       while (didCursor.hasNext()) {
         Collection<Integer> dids = didCursor.getNextBatch(maxBatchSize);
-        deleteCollectionDocParts(c, schemaName, metaCollection, dids);
+        deleteCollectionDocParts(c, schemaName, metaCollection, dids, softDeleted);
         deleted += dids.size();
       }
 
@@ -92,11 +92,11 @@ public abstract class AbstractWriteInterface implements WriteInterface {
   @Override
   public void deleteCollectionDocParts(@Nonnull DSLContext dsl,
       @Nonnull String schemaName, @Nonnull MetaCollection metaCollection,
-      @Nonnull Collection<Integer> dids
+      @Nonnull Collection<Integer> dids, boolean softDeleted
   ) {
     Connection c = dsl.configuration().connectionProvider().acquire();
     try {
-      deleteCollectionDocParts(c, schemaName, metaCollection, dids);
+      deleteCollectionDocParts(c, schemaName, metaCollection, dids, softDeleted);
     } finally {
       dsl.configuration().connectionProvider().release(c);
     }
@@ -104,16 +104,17 @@ public abstract class AbstractWriteInterface implements WriteInterface {
 
   private void deleteCollectionDocParts(Connection c, String schemaName,
       MetaCollection metaCollection,
-      Collection<Integer> dids) {
+      Collection<Integer> dids, boolean softDeleted) {
     Iterator<? extends MetaDocPart> iterator = metaCollection.streamContainedMetaDocParts()
         .sorted(TableRefComparator.MetaDocPart.DESC).iterator();
     while (iterator.hasNext()) {
       MetaDocPart metaDocPart = iterator.next();
-      String statement = getDeleteDocPartsStatement(schemaName, metaDocPart.getIdentifier(), dids);
-
+      String statement = getDeleteDocPartsStatement(schemaName, metaDocPart.getIdentifier(), dids, softDeleted);
 
       if ("_torodb".equals(schemaName)){
         sqlHelper.executeUpdate(c, statement, Context.DELETE);
+      } else if (softDeleted) {
+        sqlHelper.executeUpdate(c, statement, Context.UPDATE);
       }
 
       LOGGER.info("Executed {}", statement);
@@ -121,7 +122,7 @@ public abstract class AbstractWriteInterface implements WriteInterface {
   }
 
   protected abstract String getDeleteDocPartsStatement(String schemaName, String tableName,
-      Collection<Integer> dids);
+      Collection<Integer> dids, boolean softDeleted);
 
   @Override
   public void insertDocPartData(DSLContext dsl, String schemaName, DocPartData docPartData) throws

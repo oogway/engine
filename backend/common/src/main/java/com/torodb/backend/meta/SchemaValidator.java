@@ -21,6 +21,7 @@ package com.torodb.backend.meta;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.torodb.backend.converters.jooq.DataTypeForKv;
+import com.torodb.backend.ddl.DefaultStructureDdlOps;
 import com.torodb.backend.exceptions.InvalidDatabaseSchemaException;
 import com.torodb.backend.tables.records.MetaFieldRecord;
 import com.torodb.backend.tables.records.MetaScalarRecord;
@@ -37,6 +38,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.CREATED_AT;
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.DELETED_AT;
 
 public class SchemaValidator {
 
@@ -223,7 +227,7 @@ public class SchemaValidator {
       }
     }
 
-    return false;
+    return CREATED_AT.equals(existingField.getName()) || DELETED_AT.equals(existingField.getName());
   }
 
   public String getDatabase() {

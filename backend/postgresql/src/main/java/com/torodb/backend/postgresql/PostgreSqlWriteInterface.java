@@ -19,12 +19,8 @@
 package com.torodb.backend.postgresql;
 
 import com.codahale.metrics.Timer;
-import com.torodb.backend.AbstractWriteInterface;
-import com.torodb.backend.BackendLoggerFactory;
-import com.torodb.backend.ErrorHandler;
+import com.torodb.backend.*;
 import com.torodb.backend.ErrorHandler.Context;
-import com.torodb.backend.InternalField;
-import com.torodb.backend.SqlHelper;
 import com.torodb.backend.postgresql.converters.PostgreSqlValueToCopyConverter;
 import com.torodb.backend.tables.MetaDocPartTable;
 import com.torodb.core.d2r.DocPartData;
@@ -42,6 +38,8 @@ import org.jooq.exception.DataAccessException;
 import org.postgresql.PGConnection;
 import org.postgresql.copy.CopyManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
@@ -51,8 +49,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.DELETED_AT;
 
 @Singleton
 public class PostgreSqlWriteInterface extends AbstractWriteInterface {
@@ -79,23 +76,47 @@ public class PostgreSqlWriteInterface extends AbstractWriteInterface {
 
   @Override
   protected String getDeleteDocPartsStatement(String schemaName, String tableName,
-      Collection<Integer> dids) {
-    StringBuilder sb = new StringBuilder()
-        .append("DELETE FROM \"")
-        .append(schemaName)
-        .append("\".\"")
-        .append(tableName)
-        .append("\" WHERE \"")
-        .append(MetaDocPartTable.DocPartTableFields.DID.fieldName)
-        .append("\" IN (");
-    for (Integer did : dids) {
-      sb.append(did)
-          .append(',');
+      Collection<Integer> dids, boolean softDeleted) {
+    if ("_torodb".equals(schemaName)) {
+      StringBuilder sb = new StringBuilder()
+          .append("DELETE FROM \"")
+          .append(schemaName)
+          .append("\".\"")
+          .append(tableName)
+          .append("\" WHERE \"")
+          .append(MetaDocPartTable.DocPartTableFields.DID.fieldName)
+          .append("\" IN (");
+      for (Integer did : dids) {
+        sb.append(did)
+            .append(',');
+      }
+      sb.setCharAt(sb.length() - 1, ')');
+      String statement = sb.toString();
+      LOGGER.info("getDeleteDocPartsStatement: " + statement);
+      return statement;
+    } else if (softDeleted) {
+      StringBuilder sb = new StringBuilder()
+          .append("UPDATE \"")
+          .append(schemaName)
+          .append("\".\"")
+          .append(tableName)
+          .append("\" SET \"")
+          .append(DELETED_AT)
+          .append("\" = now() WHERE \"")
+          .append(MetaDocPartTable.DocPartTableFields.DID.fieldName)
+          .append("\" IN (");
+      for (Integer did : dids) {
+        sb.append(did)
+            .append(',');
+      }
+      sb.setCharAt(sb.length() - 1, ')');
+      String statement = sb.toString();
+      LOGGER.info("getDeleteDocPartsStatement: " + statement);
+
+      return statement;
+    } else {
+      return "";
     }
-    sb.setCharAt(sb.length() - 1, ')');
-    String statement = sb.toString();
-    LOGGER.info("getDeleteDocPartsStatement: " + statement);
-    return statement;
   }
 
   @Override

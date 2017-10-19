@@ -27,11 +27,7 @@ import com.torodb.core.TableRef;
 import com.torodb.core.backend.IdentifierConstraints;
 import com.torodb.core.exceptions.InvalidDatabaseException;
 import com.torodb.core.exceptions.user.UserException;
-import com.torodb.core.transaction.metainf.FieldType;
-import com.torodb.core.transaction.metainf.MetaCollection;
-import com.torodb.core.transaction.metainf.MetaDatabase;
-import com.torodb.core.transaction.metainf.MetaDocPart;
-import com.torodb.core.transaction.metainf.MetaIdentifiedDocPartIndex;
+import com.torodb.core.transaction.metainf.*;
 import org.apache.logging.log4j.Logger;
 import org.jooq.DSLContext;
 import org.jooq.Meta;
@@ -39,15 +35,15 @@ import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.lambda.tuple.Tuple3;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.CREATED_AT;
+import static com.torodb.backend.ddl.DefaultStructureDdlOps.DELETED_AT;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -386,7 +382,7 @@ public abstract class AbstractStructureInterface implements StructureInterface {
     String statement = getAddColumnToDocPartTableStatement(schemaName, tableName, columnName,
         dataType);
 
-    if (!columnName.equals(CREATED_AT)){
+    if (!columnName.equals(CREATED_AT) && !columnName.equals(DELETED_AT)) {
       sqlHelper.executeStatement(dsl, statement, Context.ADD_COLUMN);
     }
   }

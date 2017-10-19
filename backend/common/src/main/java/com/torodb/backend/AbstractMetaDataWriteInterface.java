@@ -282,7 +282,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaDocPartIndexColumnStatement(database.getName(), index
         .getIdentifier(), column.getPosition(),
         collection.getName(), docPart.getTableRef(), column.getIdentifier(), column.getOrdering());
-    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
+    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
     LOGGER.info("addMetaDocPartIndexColumn " + statement);
   }
 

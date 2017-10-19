@@ -35,14 +35,16 @@ import com.torodb.mongodb.utils.DefaultIdUtils;
 import com.torodb.mongowp.Status;
 import org.jooq.lambda.tuple.Tuple2;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.concurrent.ThreadSafe;
+import static java.util.stream.Collectors.toList;
 
 /**
  *
@@ -139,7 +141,7 @@ public class NamespaceJobExecutor {
         .filter(AnalyzedOp::requiresMatch) //only care about ops that requires a match
         .filter(op -> !fetchDids.containsKey(op)) //only care about ops that did not match
         .map(AnalyzedOp::getMismatchErrorMessage)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private Map<AnalyzedOp, ToroDocument> fetchDocs(NamespaceJob job,
@@ -174,8 +176,14 @@ public class NamespaceJobExecutor {
         .map(op -> fetchDids.get(op))
         .filter(did -> did != null);
 
-    transaction.getDocTransaction().delete(job.getDatabase(), job.getCollection(),
-        new IteratorCursor<>(didsToDelete.iterator()));
+    if (!"torodb".equals(job.getDatabase())) {
+      List<Integer> softDeletableDids = job.getJobs().stream().filter(j -> j.getType().equals(AnalyzedOpType.DELETE)).map(fetchDids::get).filter(Objects::nonNull).collect(toList());
+      if (!softDeletableDids.isEmpty()) {
+        transaction.getDocTransaction().delete(job.getDatabase(), job.getCollection(), new IteratorCursor<>(softDeletableDids.iterator()), true);
+      }
+    } else {
+      transaction.getDocTransaction().delete(job.getDatabase(), job.getCollection(), new IteratorCursor<>(didsToDelete.iterator()), false);
+    }
   }
 
   private void insertDocs(NamespaceJob job, WriteMongodTransaction transaction,
