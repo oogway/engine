@@ -32,6 +32,7 @@ import com.torodb.mongodb.core.WriteMongodTransaction;
 import com.torodb.mongodb.repl.oplogreplier.analyzed.AnalyzedOp;
 import com.torodb.mongodb.repl.oplogreplier.analyzed.AnalyzedOpType;
 import com.torodb.mongodb.utils.DefaultIdUtils;
+import com.torodb.mongodb.utils.NamespaceUtil;
 import com.torodb.mongowp.Status;
 import org.jooq.lambda.tuple.Tuple2;
 
@@ -176,13 +177,13 @@ public class NamespaceJobExecutor {
         .map(op -> fetchDids.get(op))
         .filter(did -> did != null);
 
-    if (!"torodb".equals(job.getDatabase())) {
+    if (NamespaceUtil.isTorodbDatabase(job.getDatabase())) {
+      transaction.getDocTransaction().delete(job.getDatabase(), job.getCollection(), new IteratorCursor<>(didsToDelete.iterator()), false);
+    } else {
       List<Integer> softDeletableDids = job.getJobs().stream().filter(j -> j.getType().equals(AnalyzedOpType.DELETE)).map(fetchDids::get).filter(Objects::nonNull).collect(toList());
       if (!softDeletableDids.isEmpty()) {
         transaction.getDocTransaction().delete(job.getDatabase(), job.getCollection(), new IteratorCursor<>(softDeletableDids.iterator()), true);
       }
-    } else {
-      transaction.getDocTransaction().delete(job.getDatabase(), job.getCollection(), new IteratorCursor<>(didsToDelete.iterator()), false);
     }
   }
 

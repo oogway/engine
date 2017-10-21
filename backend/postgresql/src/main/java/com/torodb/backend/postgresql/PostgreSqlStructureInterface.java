@@ -121,7 +121,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
       sb.append("\"").append(columnEntry.v1()).append("\" ")
           .append(columnEntry.v2() ? "ASC," : "DESC,");
     }
-    if (!"_torodb".equals(schemaName)) {
+    if (!isTorodbSchema(schemaName)) {
       sb.append("\"").append(CREATED_AT).append("\" ASC,");
     }
     sb.setCharAt(sb.length() - 1, ')');
@@ -164,7 +164,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
         sb.append(',');
       }
 
-      if (!"_torodb".equals(schemaName)) {
+      if (!isTorodbSchema(schemaName)) {
         sb.quote(CREATED_AT).append(' ').append("timestamptz default now(), ");
         sb.quote(DELETED_AT).append(' ').append("timestamptz ");
       }
@@ -185,7 +185,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
     for (InternalField<?> field : primaryKeyFields) {
       sb.quote(field.getName()).append(',');
     }
-    if (!"_torodb".equals(schemaName)) {
+    if (!isTorodbSchema(schemaName)) {
       sb.quote(CREATED_AT).append(',');
     }
     sb.setLastChar(')');
@@ -227,7 +227,7 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
     for (InternalField<?> field : indexFields) {
       sb.quote(field.getName()).append(',');
     }
-    if (!"_torodb".equals(schemaName)) {
+    if (!isTorodbSchema(schemaName)) {
       sb.quote(CREATED_AT).append(',');
     }
     sb.setLastChar(')');
@@ -266,5 +266,9 @@ public class PostgreSqlStructureInterface extends AbstractStructureInterface {
       dsl.execute(sb.toString());
       return "analyze table " + docPart.getIdentifier();
     };
+  }
+
+  private boolean isTorodbSchema(String schemaName) {
+    return "_torodb".equals(schemaName);
   }
 }

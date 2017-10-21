@@ -124,6 +124,10 @@ public class NamespaceUtil {
   public static boolean isTorodbCollection(String collection) {
     return collection.equals("torodb");
   }
+
+  public static boolean isTorodbDatabase(String dbName) {
+    return dbName.equals("torodb");
+  }
   
   public static boolean isViewCollection(String type) {
     return type.equals(Type.VIEW.getValue());

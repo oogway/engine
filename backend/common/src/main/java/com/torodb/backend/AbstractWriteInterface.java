@@ -111,7 +111,7 @@ public abstract class AbstractWriteInterface implements WriteInterface {
       MetaDocPart metaDocPart = iterator.next();
       String statement = getDeleteDocPartsStatement(schemaName, metaDocPart.getIdentifier(), dids, softDeleted);
 
-      if ("_torodb".equals(schemaName)){
+      if (isTorodbSchema(schemaName)){
         sqlHelper.executeUpdate(c, statement, Context.DELETE);
       } else if (softDeleted) {
         sqlHelper.executeUpdate(c, statement, Context.UPDATE);
@@ -119,6 +119,10 @@ public abstract class AbstractWriteInterface implements WriteInterface {
 
       LOGGER.info("Executed {}", statement);
     }
+  }
+
+  private boolean isTorodbSchema(String schemaName) {
+    return "_torodb".equals(schemaName);
   }
 
   protected abstract String getDeleteDocPartsStatement(String schemaName, String tableName,
