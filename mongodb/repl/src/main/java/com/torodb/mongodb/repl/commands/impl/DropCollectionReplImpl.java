@@ -53,7 +53,8 @@ public class DropCollectionReplImpl extends ReplCommandImpl<CollectionCommandArg
       return Status.ok();
     }
 
-    try {
+    logger.warn("Ignoring Drop collection {}.{} command", req.getDatabase(), arg.getCollection());
+    /*try {
       logger.info("Dropping collection {}.{}", req.getDatabase(), arg.getCollection());
 
       schemaEx.dropCollection(req.getDatabase(), arg.getCollection());
@@ -61,7 +62,7 @@ public class DropCollectionReplImpl extends ReplCommandImpl<CollectionCommandArg
       logger.info("Trying to drop collection {}.{} but it has not been found. "
             + "This is normal when reapplying oplog during a recovery. Ignoring operation",
             req.getDatabase(), arg.getCollection());
-    }
+    }*/
 
     return Status.ok();
 
