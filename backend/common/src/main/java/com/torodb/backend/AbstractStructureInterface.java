@@ -165,9 +165,7 @@ public abstract class AbstractStructureInterface implements StructureInterface {
       String statement = getCreateIndexStatement(indexName, schemaName, tableName, columnList,
           unique);
 
-      // TODO: below line needs to be commented
-      /*sqlHelper.executeUpdateOrThrow(dsl, statement, unique ? Context.ADD_UNIQUE_INDEX :
-          Context.CREATE_INDEX);*/
+      sqlHelper.executeUpdateOrThrow(dsl, statement, unique ? Context.ADD_UNIQUE_INDEX : Context.CREATE_INDEX);
     }
   }
 
@@ -324,8 +322,7 @@ public abstract class AbstractStructureInterface implements StructureInterface {
       String readIndexStatement = getCreateDocPartTableIndexStatement(schemaName, tableName,
           metaDataReadInterface.getReadInternalFields(tableRef));
       result.add((dsl) -> {
-        // TODO: below line needs to be commented
-        /*sqlHelper.executeStatement(dsl, readIndexStatement, Context.CREATE_INDEX);*/
+        sqlHelper.executeStatement(dsl, readIndexStatement, Context.CREATE_INDEX);
         return metaDataReadInterface.getReadInternalFields(tableRef).stream()
             .map(f -> f.getName()).collect(Collectors.joining("_")) + "_idx";
       });
@@ -347,8 +344,7 @@ public abstract class AbstractStructureInterface implements StructureInterface {
               schemaName, tableName,
               metaDataReadInterface.getReferenceInternalFields(tableRef));
           result.add((dsl) -> {
-            // TODO: below line needs to be commented
-            /*sqlHelper.executeStatement(dsl, foreignKeyIndexStatement, Context.CREATE_INDEX);*/
+            sqlHelper.executeStatement(dsl, foreignKeyIndexStatement, Context.CREATE_INDEX);
             return metaDataReadInterface.getReferenceInternalFields(tableRef).stream().map(f -> f
                 .getName()).collect(Collectors.joining("_")) + "_idx";
           });

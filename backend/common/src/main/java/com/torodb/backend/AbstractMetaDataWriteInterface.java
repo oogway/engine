@@ -251,7 +251,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaIndexStatement(database.getName(), collection.getName(), index
         .getName(),
         index.isUnique());
-    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
+    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
     LOGGER.info("addMetaIndex " + statement);
   }
 
@@ -261,7 +261,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaIndexFieldStatement(database.getName(), collection.getName(), index
         .getName(),
         field.getPosition(), field.getTableRef(), field.getFieldName(), field.getOrdering());
-    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
+    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
     LOGGER.info("addMetaIndexField " + statement);
   }
 
@@ -271,7 +271,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaDocPartIndexStatement(database.getName(), index.getIdentifier(),
         collection.getName(),
         docPart.getTableRef(), index.isUnique());
-    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
+    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
     LOGGER.info("addMetaDocPartIndex " + statement);
   }
 
@@ -282,7 +282,7 @@ public abstract class AbstractMetaDataWriteInterface implements MetaDataWriteInt
     String statement = getAddMetaDocPartIndexColumnStatement(database.getName(), index
         .getIdentifier(), column.getPosition(),
         collection.getName(), docPart.getTableRef(), column.getIdentifier(), column.getOrdering());
-    /*sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);*/
+    sqlHelper.executeUpdate(dsl, statement, Context.META_INSERT);
     LOGGER.info("addMetaDocPartIndexColumn " + statement);
   }
 

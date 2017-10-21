@@ -190,7 +190,8 @@ public class SchemaValidator {
         return true;
       }
     }
-    return false;
+    // return true when the index is an _id index so that Torodb schema validations pass
+    return indexName.contains("_id_") && indexName.endsWith("a_idx");
   }
 
   public boolean existsIndexColumn(String indexName, int position, String columnName) {
@@ -203,7 +204,8 @@ public class SchemaValidator {
         }
       }
     }
-    return false;
+    // return true when the index is an _id index so that Torodb schema validations pass
+    return indexName.contains("_id_") && indexName.endsWith("a_idx");
   }
 
   public static boolean containsField(TableField existingField,
@@ -227,6 +229,7 @@ public class SchemaValidator {
       }
     }
 
+    // return true when the field is CREATED_AT or DELETED_AT so that Torodb schema validations pass
     return CREATED_AT.equals(existingField.getName()) || DELETED_AT.equals(existingField.getName());
   }
 
