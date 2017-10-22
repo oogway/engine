@@ -122,16 +122,29 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
   protected String getReadCollectionDidsAndProjectionWithFieldInStatement(String schemaName,
                                                                           String rootTableName,
                                                                           String columnName, int valuesCount) {
+
+    String subQuery = new StringBuilder("(SELECT max(t2.\"")
+        .append(CREATED_AT)
+        .append("\") FROM \"")
+        .append(schemaName)
+        .append("\".\"")
+        .append(rootTableName)
+        .append("\" t2 WHERE t1.\"")
+        .append(columnName)
+        .append("\" = t2.\"")
+        .append(columnName)
+        .append("\")").toString();
+
     StringBuilder sb = new StringBuilder()
-        .append("SELECT \"")
+        .append("SELECT t1.\"")
         .append(DocPartTableFields.DID.fieldName)
-        .append("\",\"")
+        .append("\", t1.\"")
         .append(columnName)
         .append("\" FROM \"")
         .append(schemaName)
         .append("\".\"")
         .append(rootTableName)
-        .append("\" WHERE \"")
+        .append("\" t1 WHERE t1.\"")
         .append(columnName)
         .append("\" IN (");
 
@@ -139,7 +152,7 @@ public class PostgreSqlReadInterface extends AbstractReadInterface {
       sb.append("?,");
     }
     sb.setCharAt(sb.length() - 1, ')');
-    sb.append(" ORDER BY " + CREATED_AT + " DESC LIMIT 1");
+    sb.append(" AND t1.\"" + CREATED_AT + "\" = ").append(subQuery);
 
     String statement = sb.toString();
     LOGGER.info("getReadCollectionDidsAndProjectionWithFieldInStatement : " + statement);

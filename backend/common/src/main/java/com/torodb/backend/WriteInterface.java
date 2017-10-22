@@ -34,9 +34,9 @@ public interface WriteInterface {
       @Nonnull DocPartData docPartData) throws UserException;
 
   long deleteCollectionDocParts(@Nonnull DSLContext dsl, @Nonnull String schemaName,
-      @Nonnull MetaCollection metaCollection, @Nonnull Cursor<Integer> didCursor);
+      @Nonnull MetaCollection metaCollection, @Nonnull Cursor<Integer> didCursor, boolean softDeleted);
 
   void deleteCollectionDocParts(@Nonnull DSLContext dsl, @Nonnull String schemaName,
-      @Nonnull MetaCollection metaCollection, @Nonnull Collection<Integer> dids);
+      @Nonnull MetaCollection metaCollection, @Nonnull Collection<Integer> dids, boolean softDeleted);
 
 }

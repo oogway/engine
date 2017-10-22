@@ -57,8 +57,8 @@ public class WriteDocTransactionDecorator extends DocTransactionDecorator<WriteD
   }
 
   @Override
-  public void delete(String dbName, String colName, Cursor<Integer> cursor) {
-    getDecorated().delete(dbName, colName, cursor);
+  public void delete(String dbName, String colName, Cursor<Integer> cursor, boolean softDeleted) {
+    getDecorated().delete(dbName, colName, cursor, softDeleted);
   }
 
   @Override

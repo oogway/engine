@@ -88,7 +88,7 @@ class SqlWriteTransaction extends SqlTransaction<WriteDmlTransaction>
   }
 
   @Override
-  public void delete(String dbName, String colName, Cursor<Integer> cursor) {
+  public void delete(String dbName, String colName, Cursor<Integer> cursor, boolean softDeleted) {
     MetaDatabase db = getMetaSnapshot().getMetaDatabaseByName(dbName);
     if (db == null) {
       return;
@@ -98,7 +98,7 @@ class SqlWriteTransaction extends SqlTransaction<WriteDmlTransaction>
       return;
     }
 
-    getBackendTransaction().deleteDids(db, col, cursor.getRemaining());
+    getBackendTransaction().deleteDids(db, col, cursor.getRemaining(), softDeleted);
   }
 
   @Override
@@ -116,7 +116,7 @@ class SqlWriteTransaction extends SqlTransaction<WriteDmlTransaction>
         .findAll(db, col)
         .asDidCursor()
         .getRemaining();
-    getBackendTransaction().deleteDids(db, col, dids);
+    getBackendTransaction().deleteDids(db, col, dids, false);
 
     return dids.size();
   }
@@ -150,7 +150,7 @@ class SqlWriteTransaction extends SqlTransaction<WriteDmlTransaction>
         .findByField(db, col, docPart, field, value)
         .asDidCursor()
         .getRemaining();
-    getBackendTransaction().deleteDids(db, col, dids);
+    getBackendTransaction().deleteDids(db, col, dids, false);
 
     return dids.size();
   }

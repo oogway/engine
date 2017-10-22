@@ -50,7 +50,12 @@ public class RenameCollectionReplImpl
   public Status<Empty> apply(Request req,
       Command<? super RenameCollectionArgument, ? super Empty> command,
       RenameCollectionArgument arg, SchemaOperationExecutor schemaEx) {
-    try {
+
+    logger.warn("Ignoring Renaming collection {}.{} to {}.{} command", arg.getFromDatabase(), arg.getFromCollection(),
+        arg.getToDatabase(), arg.getToCollection());
+
+    return Status.ok();
+    /*try {
       if (!namespaceFilter.filter(arg.getToDatabase(), arg.getToCollection())) {
         if (!namespaceFilter.filter(arg.getFromDatabase(), arg.getFromCollection())) {
           logger.info("Skipping rename operation for filtered source collection {}.{} "
@@ -105,9 +110,7 @@ public class RenameCollectionReplImpl
           + "normal when reapplying oplog during a recovery.",
           arg.getFromDatabase(), arg.getFromCollection(), arg.getToDatabase(),
           arg.getToCollection(),ex.getClass().getSimpleName());
-    }
-
-    return Status.ok();
+    }*/
   }
 
 }
