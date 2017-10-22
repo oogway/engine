@@ -44,16 +44,14 @@ public class DropDatabaseReplImpl extends ReplCommandImpl<Empty, Empty> {
   public Status<Empty> apply(Request req,
       Command<? super Empty, ? super Empty> command, Empty arg,
       SchemaOperationExecutor schemaEx) {
+    logger.warn("Ignoring Dropping database {} command", req.getDatabase());
+    return Status.ok();
 
-    if (!filterUtil.testDbFilter(req.getDatabase(), command)) {
+    /*if (!filterUtil.testDbFilter(req.getDatabase(), command)) {
       return Status.ok();
     }
-    
     logger.info("Dropping database {}", req.getDatabase());
-
-    schemaEx.dropDatabase(req.getDatabase());
-
-    return Status.ok();
+    schemaEx.dropDatabase(req.getDatabase());*/
   }
 
 }

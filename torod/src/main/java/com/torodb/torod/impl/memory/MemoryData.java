@@ -234,7 +234,7 @@ class MemoryData {
       });
     }
 
-    long delete(String dbName, String colName, Stream<Integer> dids) {
+    long delete(String dbName, String colName, Stream<Integer> dids, boolean softDeleted) {
       Map<Integer, KvDocument> map = getMap(dbName, colName);
       return dids.map(did -> {
         return map.remove(did) != null;

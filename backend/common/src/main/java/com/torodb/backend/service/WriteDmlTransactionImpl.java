@@ -66,7 +66,7 @@ class WriteDmlTransactionImpl extends BackendTransactionImpl implements
   }
 
   @Override
-  public void deleteDids(MetaDatabase db, MetaCollection col, Collection<Integer> dids) {
+  public void deleteDids(MetaDatabase db, MetaCollection col, Collection<Integer> dids, boolean softDeleted) {
     Preconditions.checkState(!isClosed(), "This transaction is closed");
 
     if (dids.isEmpty()) {
@@ -74,7 +74,7 @@ class WriteDmlTransactionImpl extends BackendTransactionImpl implements
     }
 
     getSqlInterface().getWriteInterface()
-        .deleteCollectionDocParts(getDsl(), db.getIdentifier(), col, dids);
+        .deleteCollectionDocParts(getDsl(), db.getIdentifier(), col, dids, softDeleted);
   }
 
   @Override

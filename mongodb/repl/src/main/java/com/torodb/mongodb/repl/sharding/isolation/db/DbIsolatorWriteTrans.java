@@ -58,8 +58,8 @@ public class DbIsolatorWriteTrans extends DbIsolatorTrans<WriteDocTransaction>
   }
 
   @Override
-  public void delete(String dbName, String colName, Cursor<Integer> cursor) {
-    getDecorated().delete(getConverter().convertDatabaseName(dbName), colName, cursor);
+  public void delete(String dbName, String colName, Cursor<Integer> cursor, boolean softDeleted) {
+    getDecorated().delete(getConverter().convertDatabaseName(dbName), colName, cursor, softDeleted);
   }
 
   @Override

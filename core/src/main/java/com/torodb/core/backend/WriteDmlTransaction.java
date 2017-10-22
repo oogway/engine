@@ -53,7 +53,7 @@ public interface WriteDmlTransaction extends DmlTransaction {
   public void insert(MetaDatabase db, MetaCollection col, DocPartData data) 
       throws RollbackException, UserException;
 
-  public void deleteDids(MetaDatabase db, MetaCollection col, Collection<Integer> dids);
+  public void deleteDids(MetaDatabase db, MetaCollection col, Collection<Integer> dids, boolean softDeleted);
 
   /**
    * Stores the given key value association.

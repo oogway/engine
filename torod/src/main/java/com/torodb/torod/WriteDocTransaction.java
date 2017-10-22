@@ -73,14 +73,14 @@ public interface WriteDocTransaction extends DocTransaction {
 
   public default void delete(String dbName, String colName, List<ToroDocument> candidates) {
     delete(dbName, colName, new IteratorCursor<>(candidates.stream().map(ToroDocument::getId)
-        .iterator()));
+        .iterator()), false);
   }
 
   public default void delete(String dbName, String colName, TorodCursor cursor) {
-    delete(dbName, colName, cursor.asDidCursor());
+    delete(dbName, colName, cursor.asDidCursor(), false);
   }
 
-  public void delete(String dbName, String colName, Cursor<Integer> cursor);
+  public void delete(String dbName, String colName, Cursor<Integer> cursor, boolean softDeleted);
 
   public long deleteAll(String dbName, String colName);
 
