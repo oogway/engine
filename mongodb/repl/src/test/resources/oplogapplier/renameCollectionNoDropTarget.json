@@ -14,9 +14,8 @@
         }
     },
     "expectedState": {
-        "db1": {},
-        "db2": {
-            "col2": [
+        "db1": {
+            "col1": [
                 {
                     "_id": 1,
                     "a": 1

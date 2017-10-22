@@ -22,7 +22,22 @@
     },
     "expectedState": {
         "test": {
-            "unmodifiedCol": []
+            "unmodifiedCol": [],
+            "toSystem": [
+                {
+                    "_id": 1
+                }
+            ],
+            "toIgnoredCol": [
+                {
+                    "_id": 1
+                }
+            ],
+            "toIgnoredDb": [
+                {
+                    "_id": 1
+                }
+            ]
         }
     },
     "oplog": [
